@@ -57,9 +57,9 @@ class DocController
         $this->assets_path = __DIR__.DS.'assets'.DS;
         $this->view_path = __DIR__.DS.'view'.DS;
         if(!defined('THINK_VERSION')){
-            $this->doc = new Doc((array)\think\facade\Config::pull('doc'));
+            $this->doc = new Doc((array)\think\facade\Config::pull('apidoc'));
         }else{
-            $this->doc = new Doc((array)\think\Config::get('doc'));
+            $this->doc = new Doc((array)\think\Config::get('apidoc'));
         }
         $config = [
             'view_path' => $this->view_path,
