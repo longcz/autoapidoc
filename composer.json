@@ -1,6 +1,6 @@
 {
     "name": "longcz/autoapidoc",
-    "description": "The ThinkPHP5 Api Doc Package",
+    "description": "Automatic API Document Generation Package",
     "type": "think-extend",
     "authors": [
         {
@@ -22,7 +22,7 @@
     },
     "extra": {
         "think-config": {
-            "doc1": "src/config.php"
+            "apidoc": "src/config.php"
         }
     }
 }
