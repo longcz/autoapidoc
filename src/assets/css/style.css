@@ -4,16 +4,16 @@ body, table, input, textarea, select, button {
 
 body {
 	margin: 0 auto;
-	font-size: 14px;
+	font-size: 15px;
 }
 
 a {
-	color: #00A881;
+	color: #354053;
 	text-decoration: none;
 }
 
 a:HOVER {
-	color: #00A881;
+	color: #354053;
 	text-decoration: none;
 }
 
@@ -69,11 +69,11 @@ h6 {
 }
 
 .zt_header {
-	height: 60px;
-	background-color: #00A881;
+	height: 80px;
+	background-color: #354053;
 	color: #fff;
 	font-size: 30px;
-	line-height: 60px;
+	line-height: 80px;
 	padding-left: 20px;
 }
 
@@ -83,7 +83,7 @@ h6 {
 
 .zt_footer {
 	height: 60px;
-	border-top: 2px solid #00A881;
+	border-top: 2px solid #354053;
 	position: absolute;
 	left: 0;
 	right: 0;
@@ -96,8 +96,8 @@ h6 {
 	width: 300px;
 	left: 0;
 	bottom: 0px;
-	top: 60px;
-	border-right: 2px solid #00A881;
+	top: 80px;
+	border-right: 2px solid #354053;
 	overflow: auto;
 }
 
@@ -116,9 +116,9 @@ h6 {
 .zt_content {
 	position: absolute;
 	right: 0;
-	left: 302px;
+	left: 300px;
 	bottom: 0px;
-	top: 60px;
+	top: 80px;
 	overflow-y: auto;
 }
 
@@ -241,7 +241,7 @@ pre code{
 .am-list>li>a {
 	display: block;
 	padding: 1rem 0;
-	color: #00A881;
+	color: #354053;
 	text-decoration: none;
 	padding-left: 2em;
 }
@@ -262,3 +262,38 @@ pre code{
 	top:50%;
 	transform:translateY(-50%);
 }
+
+.nav-tabs>li>a{
+	margin-right: 0!important;
+	border-radius: 0!important;
+}
+
+.api-title{
+	text-align: left;
+	font-size: 22px!important;
+	font-weight: bold!important;
+	height: 50px;
+	border-bottom: 1px solid #ddd;
+}
+.jumbotron{background: none!important;}
+.jumbotron p{font-size: 17px;font-weight: bold}
+.jumbotron div.tlct{padding:0 20px;font-size: 16px;line-height: 24px}
+.dropdown-menu{min-width: auto!important;}
+.tbnew-style{border: 1px solid #ddd}
+.tbnew-style>tbody>tr>td,
+.tbnew-style>tbody>tr>th,
+.tbnew-style>tfoot>tr>td,
+.tbnew-style>tfoot>tr>th,
+.tbnew-style>thead>tr>td,
+.tbnew-style>thead>tr>th{
+	border: 1px solid #ddd!important;
+}
+.tbnew-style>tbody>tr>th{
+	background-color: rgb(64, 158, 255);
+	color: rgb(255, 255, 255);
+	font-size: 17px;
+}
+.rt{
+	border: 1px solid #ddd;
+}
+pre{color:#080;!important;background: none;font-size: 14px;border: none;margin-bottom: -10px}

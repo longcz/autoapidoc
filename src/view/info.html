@@ -7,13 +7,16 @@
 {block name="main"}
 <div class="container">
     <div class="jumbotron">
-        <p class="bg-success" style="font-size: 18px;">文档地址：{$root}/doc?name={$doc['name']}</p>
-        <h2>接口：{$doc.title|default="请设置title注释"}</h2>
-        <p>接口地址：{$doc.url|default="请设置url注释"} <span class="label label-success">{$doc.method|default='GET'}</span></p>
-        <p class="text-primary">{$doc.title|default="请设置title注释"} -- {$doc.author|default="请设置auhtor注释"}</p>
+        <p class="api-title">{$doc.title|default="请设置title注释"}</p>
+        {if $doc.author}
+        <p>开发人员：<div class="tlct">{$doc.author|default="请设置auhtor注释"}</div></p>
+        {/if}
+        {if $doc.description}
+        <p>简要描述：<div class="tlct">{$doc.description|default=""}</div></p>
+        {/if}
+        <p>接口路径（URI）：<div class="tlct" style="color: rgb(221, 17, 68)">{$doc.url|default="请设置url注释"}</div></p>
+        <p>请求方式： <div class="tlct">{$doc.method|default='GET'}</div></p>
         <br/>
-        <p><strong>{$doc.description|default=""}</strong></p><br/>
-
         <ul id="myTab" class="nav nav-tabs">
             <li class="active"><a href="#info" data-toggle="tab">接口信息</a></li>
             <li><a href="#test" data-toggle="tab">在线测试</a></li>
@@ -22,14 +25,14 @@
             <!--info-->
             <div class="tab-pane fade in active" id="info">
                 {if condition="isset($doc.header) &&  !empty($doc.header)"}
-                <h3>请求Headers</h3>
-                <table class="table table-striped" >
-                    <tr><th>名称</th><th>是否必须</th><th>默认值</th><th>说明</th></tr>
+                <br/>
+                <p>头部参数</p>
+                <table class="table table-striped tbnew-style" >
+                    <tr><th>参数</th><th>必选</th><th>说明</th></tr>
                     {volist name="doc.header" id="head"}
                     <tr>
                         <td>{$head.name|default="-"}</td>
                         <td>{if condition="$head.require eq 1"}必填{else/}非必填{/if}</td>
-                        <td>{$head.default|default="-"}</td>
                         <td>{$head.desc|default="-"}</td>
                     </tr>
                     {/volist}
@@ -37,39 +40,35 @@
                 <br>
                 {/if}
                 {if condition="isset($doc.param)"}
-                <h3>接口参数</h3>
-                <table class="table table-striped" >
-                    <tr><th>参数名字</th><th>类型</th><th>是否必须</th><th>默认值</th><th>其他</th><th>说明</th></tr>
+                <p>接口参数</p>
+                <table class="table table-striped tbnew-style" >
+                    <tr><th>参数</th><th>必选</th><th>类型</th><th>说明</th></tr>
                     {volist name="doc.param" id="param"}
                     <tr>
                         <td>{$param.name|default="-"}</td>
-                        <td>{$param.type|default="-"}</td>
                         <td>{if condition="$param.require eq 1"}必填{else/}非必填{/if}</td>
-                        <td>{$param.default|default="-"}</td>
-                        <td>{$param.other|default="-"}</td>
+                        <td>{$param.type|default="-"}</td>
                         <td>{$param.desc|default="-"}</td>
                     </tr>
                     {/volist}
                 </table>
                 <br>
                 {/if}
-                {if condition="isset($doc.remark)"}
-                <h3>备注说明</h3>
-                <div role="alert" class="alert alert-info">
-                    {$doc.remark|default="无"}
-                </div>
+                <p>返回参数</p>
+                <p class="rt" id="rt">{$return}</p>
                 <br>
+                {if condition="isset($doc.remark)"}
+                <p>备注说明</p>
+                <div class="tlct">{$doc.remark|default="无"}</div>
                 {/if}
-                <h3>返回结果</h3>
-                <p><code id="json_text">{$return}</code></p>
             </div>
             <!--info-->
             <!--test-->
             <div class="tab-pane fade in" id="test">
                 <br>
                 <!--head-->
-                <div class="panel panel-primary" style="border-color: #00A881">
-                    <div class="panel-heading" style="border-color: #00A881;background-color: #00A881">
+                <div class="panel panel-primary" style="border-color: rgb(64, 158, 255)">
+                    <div class="panel-heading" style="border-color: rgb(64, 158, 255);background-color: rgb(64, 158, 255)">
                         <h3 class="panel-title">接口参数</h3>
                     </div>
                     <div class="panel-body">
@@ -81,17 +80,6 @@
                                 </div>
                                 <div class="col-sm-4"><button type="button" id="send" class="btn btn-success" data-loading-text="Loading..." autocomplete="off">发送测试</button></div>
                             </div>
-                            {if condition="isset($doc.header) && !empty($doc.header)"}
-                                {volist name="doc.header" id="head"}
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label"><span class="badge">header</span> {$head.name|default=""}</label>
-                                    <div class="col-sm-6">
-                                        <input class="form-control" type="text" name="header[{$head.name}]" value="">
-                                    </div>
-                                    <div class="col-sm-4"><label class="control-label text-warning"></label></div>
-                                </div>
-                                {/volist}
-                            {/if}
                             <div class="form-group">
                                 <label class="col-sm-2 control-label">提交方式</label>
                                 <div class="col-sm-6">
@@ -104,20 +92,32 @@
                                 </div>
                                 <div class="col-sm-4"></div>
                             </div>
+                            {if condition="isset($doc.header) && !empty($doc.header)"}
+                            {volist name="doc.header" id="head"}
                             <div class="form-group">
+                                <label class="col-sm-2 control-label">{$head.name|default=""}</label>
+                                <div class="col-sm-6">
+                                    <input class="form-control" type="text" name="header[{$head.name}]" value="">
+                                </div>
+                                <div class="col-sm-4"><label class="control-label text-warning"><span class="badge">头部参数</span></label></div>
+                            </div>
+                            {/volist}
+                            {/if}
+
+                            <!--<div class="form-group">
                                 <label class="col-sm-2 control-label">Cookie</label>
                                 <div class="col-sm-6">
                                     <textarea class="form-control" type="text" name="cookie">{:http_build_query($_COOKIE,'',';')}</textarea>
                                 </div>
                                 <div class="col-sm-4"></div>
-                            </div>
-                            <div class="form-group">
+                            </div>-->
+                            <!--<div class="form-group">
                                 <label class="col-sm-2 control-label">&nbsp;&nbsp;&nbsp;</label>
                                 <div class="col-sm-6">
                                     <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#addParamModal">
                                         <span class="glyphicon glyphicon-plus"></span> 增加参数</button>
                                 </div>
-                            </div>
+                            </div>-->
                             {if condition="isset($doc.param)"}
                             {volist name="doc.param" id="param"}
                             <div class="form-group">
@@ -125,7 +125,7 @@
                                 <div class="col-sm-6">
                                     <input class="form-control" type="text" name="{$param.name|default=''}" value="">
                                 </div>
-                                <div class="col-sm-4"><label class="control-label text-warning"></label></div>
+                                <div class="col-sm-4"><label class="control-label text-warning"><span class="badge">接口参数</span></label></label></div>
                             </div>
                             {/volist}
                             {/if}
@@ -134,15 +134,15 @@
                 </div>
                 <!--head-->
 
-                <div class="panel panel-primary" style="border-color: #00A881;">
-                    <div class="panel-heading" style="border-color: #00A881;background-color: #00A881">
+                <div class="panel panel-primary" style="rgb(64, 158, 255)">
+                    <div class="panel-heading" style="border-color: rgb(64, 158, 255);background-color: rgb(64, 158, 255)">
                         <h3 class="panel-title">返回结果</h3>
                     </div>
                     <div class="panel-body" id="span_result">
                         <div class="form-inline result_body">
-                            <button type="button" class="btn btn-info" data-toggle="modal" data-target="#addJosnTextmModal">自定义解析数据</button>
-                            <label>缩进量:</label>
-                            <select class="form-control" id="TabSize"  onchange="TabSizeChanged()">
+                            <!--<button type="button" class="btn btn-info" data-toggle="modal" data-target="#addJosnTextmModal">自定义解析数据</button>-->
+                           <!-- <label>缩进量:</label>-->
+                            <select class="form-control" id="TabSize"  onchange="TabSizeChanged()" style="display: none">
                                 <option value="1">1</option>
                                 <option value="2" selected="true">2</option>
                                 <option value="3">3</option>
@@ -150,7 +150,7 @@
                                 <option value="5">5</option>
                                 <option value="6">6</option>
                             </select>
-                            <input type="checkbox" id="QuoteKeys" onclick="QuoteKeysClicked()" checked="true"/> <label>引号</label>
+                           <!--<input type="checkbox" id="QuoteKeys" onclick="QuoteKeysClicked()" checked="true"/> <label>引号</label>
                             <a href="javascript:void(0);" onclick="SelectAllClicked()">全选</a>
                             <a href="javascript:void(0);" onclick="ExpandAllClicked()">展开</a>
                             <a href="javascript:void(0);" onclick="CollapseAllClicked()">叠起</a>
@@ -160,7 +160,7 @@
                             <a href="javascript:void(0);" onclick="CollapseLevel(6)">5级</a>
                             <a href="javascript:void(0);" onclick="CollapseLevel(7)">6级</a>
                             <a href="javascript:void(0);" onclick="CollapseLevel(8)">7级</a>
-                            <a href="javascript:void(0);" onclick="CollapseLevel(9)">8级</a>
+                            <a href="javascript:void(0);" onclick="CollapseLevel(9)">8级</a>-->
                         </div>
 
                         <div id="Canvas" class="Canvas"></div>
@@ -172,14 +172,11 @@
             </div>
             <!--test-->
         </div>
-
-
         <br/>
         <div role="alert" class="alert alert-info">
             <strong>提示：此文档是由系统自动生成，如发现错误或疑问请告知开发人员及时修改</strong>
         </div>
     </div>
-
     <p>&copy; {$copyright} <p>
 </div>
 <!-- 模态框（Modal） -->
@@ -241,7 +238,11 @@
     </div><!-- /.modal -->
 </div>
 <script type="text/javascript">
+
     $(function () {
+        var resultJson = formatJson('{$return}');
+        document.getElementById("rt").innerHTML = '<pre>' + resultJson + '<pre/>';
+
         $('#addParamModal').on('show.bs.modal', function () {
             init();
         })
@@ -301,5 +302,66 @@
             $('#addJosnTextmModal').modal('hide');
         });
     }
+
+
+    //格式化代码函数,已经用原生方式写好了不需要改动,直接引用就好
+    var formatJson = function(json, options) {
+        var reg = null,
+            formatted = '',
+            pad = 0,
+            PADDING = '    ';
+        options = options || {};
+        options.newlineAfterColonIfBeforeBraceOrBracket = (options.newlineAfterColonIfBeforeBraceOrBracket === true) ? true : false;
+        options.spaceAfterColon = (options.spaceAfterColon === false) ? false : true;
+        if (typeof json !== 'string') {
+            json = JSON.stringify(json);
+        } else {
+            json = JSON.parse(json);
+            json = JSON.stringify(json);
+        }
+        reg = /([\{\}])/g;
+        json = json.replace(reg, '\r\n$1\r\n');
+        reg = /([\[\]])/g;
+        json = json.replace(reg, '\r\n$1\r\n');
+        reg = /(\,)/g;
+        json = json.replace(reg, '$1\r\n');
+        reg = /(\r\n\r\n)/g;
+        json = json.replace(reg, '\r\n');
+        reg = /\r\n\,/g;
+        json = json.replace(reg, ',');
+        if (!options.newlineAfterColonIfBeforeBraceOrBracket) {
+            reg = /\:\r\n\{/g;
+            json = json.replace(reg, ':{');
+            reg = /\:\r\n\[/g;
+            json = json.replace(reg, ':[');
+        }
+        if (options.spaceAfterColon) {
+            reg = /\:/g;
+            json = json.replace(reg, ':');
+        }
+        (json.split('\r\n')).forEach(function(node, index) {
+            var i = 0,
+                indent = 0,
+                padding = '';
+
+            if (node.match(/\{$/) || node.match(/\[$/)) {
+                indent = 1;
+            } else if (node.match(/\}/) || node.match(/\]/)) {
+                if (pad !== 0) {
+                    pad -= 1;
+                }
+            } else {
+                indent = 0;
+            }
+
+            for (i = 0; i < pad; i++) {
+                padding += PADDING;
+            }
+
+            formatted += padding + node + '\r\n';
+            pad += indent;
+        });
+        return formatted;
+    };
 </script>
 {/block}

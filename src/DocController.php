@@ -19,7 +19,7 @@ class DocController
      */
     protected $view;
     /**
-     * @var Doc 
+     * @var Doc
      */
     protected $doc;
     /**
@@ -199,13 +199,13 @@ class DocController
     {
         foreach ($actions as $key=>$moudel){
             if(isset($moudel['actions'])){
-                $actions[$key]['iconClose'] = $this->assets_path."/js/zTree_v3/img/zt-folder.png";
-                $actions[$key]['iconOpen'] = $this->assets_path."/js/zTree_v3/img/zt-folder-o.png";
+                $actions[$key]['iconClose'] = $this->assets_path."/js/zTree_v3/img/folder.png";
+                $actions[$key]['iconOpen'] = $this->assets_path."/js/zTree_v3/img/folder_op.png";
                 $actions[$key]['open'] = true;
                 $actions[$key]['isParent'] = true;
                 $actions[$key]['actions'] = $this->setIcon($moudel['actions'], $num = 1);
             }else{
-                $actions[$key]['icon'] = $this->assets_path."/js/zTree_v3/img/zt-file.png";
+                $actions[$key]['icon'] = $this->assets_path."/js/zTree_v3/img/file.png";
                 $actions[$key]['isParent'] = false;
                 $actions[$key]['isText'] = true;
             }
@@ -235,12 +235,15 @@ class DocController
         $action_doc = $this->doc->getInfo($class, $action);
         if($action_doc)
         {
-            $return = $this->doc->formatReturn($action_doc);
+            //echo(json_encode($this->returnParser('return',$action_doc),JSON_UNESCAPED_UNICODE));
+            $return = json_encode($this->doc->returnParser('return',$action_doc),JSON_UNESCAPED_UNICODE);
+            //$return = $this->doc->formatReturn($action_doc);
             $action_doc['header'] = isset($action_doc['header']) ? array_merge($this->doc->__get('public_header'), $action_doc['header']) : [];
             $action_doc['param'] = isset($action_doc['param']) ? array_merge($this->doc->__get('public_param'), $action_doc['param']) : [];
             return $this->show('info', ['doc'=>$action_doc, 'return'=>$return]);
         }
     }
+
 
 
     /**

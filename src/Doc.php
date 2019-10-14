@@ -6,13 +6,13 @@ class Doc
     protected  $config = [
         'title'=>'API接口文档',
         'version'=>'1.0.0',
-        'copyright'=>'520国际（中国）集团公司',
+        'copyright'=>'开发者文档',
         'password' => '',
         'static_path' => '',
         'controller' => [],
         'filter_method'=>['_empty'],
         'return_format' => [
-            'status' => "200/300/301/302",
+            'status' => "200",
             'message' => "提示信息",
         ]
     ];
@@ -227,9 +227,9 @@ class Doc
                             $action_doc = $doc->parse($doc_str);
                             $action_doc['name'] = $class."::".$action->name;
                             if((isset($action_doc['title']) && strpos($action_doc['title'], $keyword) !== false)
-                                    || (isset($action_doc['description']) && strpos($action_doc['description'], $keyword) !== false)
-                                    || (isset($action_doc['author']) && strpos($action_doc['author'], $keyword) !== false)
-                                    || (isset($action_doc['url'])  && strpos($action_doc['url'], $keyword) !== false))
+                                || (isset($action_doc['description']) && strpos($action_doc['description'], $keyword) !== false)
+                                || (isset($action_doc['author']) && strpos($action_doc['author'], $keyword) !== false)
+                                || (isset($action_doc['url'])  && strpos($action_doc['url'], $keyword) !== false))
                             {
                                 array_push($list, $action_doc);
                             }
@@ -242,6 +242,78 @@ class Doc
     }
 
     /**
+     * 格式化数组为json字符串
+     *
+     * @param $ky
+     * @param array $doc
+     * @return mixed
+     */
+    public function returnParser($ky,$doc=[]){
+        $res = $this->config['return_format'];
+        $data = [];
+        foreach ($doc[$ky] as $key=>$val){
+            if(strpos($val, '@!') != false){
+                $data = $this->string2json($data,$val,$doc);
+            }elseif (strpos($val, '@') != false){
+                $data = $this->string2jsonArray($data,$val,$doc);
+            }else{
+                $exp = explode(":", trim($val));
+                if(strpos($val,'#') != false){
+                    $data[$exp[0]]='['.str_replace('#','',$exp[1]).']';
+                }else{
+                    $data[$exp[0]]=$exp[1];
+                }
+            }
+        }
+        $res['data']=$data;
+        return $res;
+    }
+
+    /**
+     * 字符串转化JSON数组
+     *
+     * @param $data
+     * @param $val
+     * @param $doc
+     * @return mixed
+     */
+    public function string2jsonArray($data,$val,$doc){
+        $exp = explode(":", trim($val));
+        $exp_v1 = explode(" ", trim($doc[$exp[0]]));
+        foreach ($exp_v1 as $key1=>$val1){
+            $exp_v2 = explode(":", trim($val1));
+            if(strpos($exp_v2[1], '@!') != false){
+                $data = $this->string2json($data,$exp_v2,$doc);
+            }elseif (strpos($exp_v2[1], '@') != false){
+                $dt=$this->string2jsonArray(array(),$val1,$doc);
+                $data[$exp[0]][$exp_v2[0]]=$dt[$exp_v2[0]];
+            }else{
+                $data[$exp[0]][$exp_v2[0]]=$exp_v2[1];
+            }
+        }
+        return $data;
+    }
+
+    /**
+     * 字符串转JSON
+     *
+     * @param $data
+     * @param $val
+     * @param $doc
+     * @return mixed
+     */
+    public function string2json($data,$val,$doc){
+        $exp = explode(":", trim($val));
+        $exp_v1 = explode(" ", trim($doc[$exp[0]]));
+        foreach ($exp_v1 as $key1=>$val1){
+            $exp_v2 = explode(":", trim($val1));
+            $data[$exp[0]][$exp_v2[0]]=$exp_v2[1];
+        }
+        return $data;
+    }
+
+
+    /**
      * 格式化数组为json字符串-用于格式显示
      * @param array $doc
      * @return string
@@ -251,17 +323,18 @@ class Doc
         $json = '{<br>';
         $data = $this->config['return_format'];
         foreach ($data as $name=>$value) {
-            $json .= '&nbsp;&nbsp;"'.$name.'":'.$value.',<br>';
+            $json .= '&nbsp;&nbsp;"'.$name.'":'.'"'.$value.'"'.'<br>';
         }
         $json .= '&nbsp;&nbsp;"data":{<br/>';
         $returns = isset($doc['return']) ? $doc['return'] : [];
         foreach ($returns as $val)
         {
             list($name, $value) =  explode(":", trim($val));
+            //var_dump($name);
             if(strpos($value, '@') != false){
-                $json .= $this->string2jsonArray($doc, $val, '&nbsp;&nbsp;&nbsp;&nbsp;');
+                $json .= $this->string2jsonArrayShow($doc, $val, '&nbsp;&nbsp;&nbsp;&nbsp;');
             }else{
-                $json .= '&nbsp;&nbsp;&nbsp;&nbsp;' . $this->string2json(trim($name), $value);
+                $json .= '&nbsp;&nbsp;&nbsp;&nbsp;' . $this->string2jsonShow(trim($name), $value);
             }
         }
         $json .= '&nbsp;&nbsp;}<br/>';
@@ -275,9 +348,9 @@ class Doc
      * @param $val
      * @return string
      */
-    private function string2json($name, $val){
+    private function string2jsonShow($name, $val){
         if(strpos($val,'#') != false){
-            return '"'.$name.'": ["'.str_replace('#','',$val).'"],<br/>';
+            return '"'.$name.'": ["'.str_replace('#','',$val).'"]<br/>';
         }else {
             return '"'.$name.'":"'.$val.'",<br/>';
         }
@@ -290,8 +363,9 @@ class Doc
      * @param $space
      * @return string
      */
-    private function string2jsonArray($doc, $val, $space){
+    private function string2jsonArrayShow($doc, $val, $space){
         list($name, $value) =  explode(":", trim($val));
+        //var_dump($name);
         $json = "";
         if(strpos($value, "@!") != false){
             $json .= $space.'"'.$name.'":{//'.str_replace('@!','',$value).'<br/>';
@@ -302,9 +376,9 @@ class Doc
         if(preg_match_all('/(\w+):(.*?)[\s\n]/s', $return." ", $meatchs)){
             foreach ($meatchs[0] as $key=>$v){
                 if(strpos($meatchs[2][$key],'@') != false){
-                    $json .= $this->string2jsonArray($doc,$v,$space.'&nbsp;&nbsp;');
+                    $json .= $this->string2jsonArrayShow($doc,$v,$space.'&nbsp;&nbsp;');
                 } else{
-                    $json .= $space.'&nbsp;&nbsp;'. $this->string2json(trim($meatchs[1][$key]), $meatchs[2][$key]);
+                    $json .= $space.'&nbsp;&nbsp;'. $this->string2jsonShow(trim($meatchs[1][$key]), $meatchs[2][$key]);
                 }
             }
         }
@@ -315,4 +389,5 @@ class Doc
         }
         return $json;
     }
+
 }
